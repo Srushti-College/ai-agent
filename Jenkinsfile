@@ -1,4 +1,3 @@
-
 pipeline {
 
     agent any
@@ -176,43 +175,6 @@ pipeline {
                 """
             }
         }
-
-        stage('Rollout Verification') {
-            steps {
-
-                sh '''
-                    kubectl rollout status \
-                      deployment/employee-backend \
-                      -n ai-agent
-
-                    kubectl rollout status \
-                      deployment/ai-agent-frontend \
-                      -n ai-agent
-                '''
-            }
-        }
-
-        stage('Final Verification') {
-            steps {
-
-                sh '''
-                    kubectl get pods \
-                      -n ai-agent
-
-                    kubectl get svc \
-                      -n ai-agent
-
-                    kubectl get ingress \
-                      -n ai-agent
-
-                    kubectl get pvc \
-                      -n ai-agent
-
-                    kubectl get statefulset \
-                      -n ai-agent
-                '''
-            }
-        }
     }
 
     post {
@@ -234,4 +196,3 @@ pipeline {
         }
     }
 }
-```
