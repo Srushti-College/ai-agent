@@ -3,12 +3,9 @@ pipeline {
     agent any
 
     environment {
-
         DOCKERHUB_USERNAME = 'srushti22'
-
         BACKEND_IMAGE = "${DOCKERHUB_USERNAME}/ai-agent-backend"
         FRONTEND_IMAGE = "${DOCKERHUB_USERNAME}/ai-agent-frontend"
-
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
@@ -21,18 +18,14 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-
             parallel {
 
                 stage('Backend Dependencies') {
                     steps {
                         sh '''
                             cd backend
-
                             python3 -m venv venv
-
-                            ./venv/bin/pip install \
-                              -r requirements.txt
+                            ./venv/bin/pip install -r requirements.txt
                         '''
                     }
                 }
@@ -41,7 +34,6 @@ pipeline {
                     steps {
                         sh '''
                             cd frontend
-
                             npm ci
                         '''
                     }
@@ -51,25 +43,24 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-
                 withSonarQubeEnv('SonarQube') {
-
                     script {
-
                         def scannerHome = tool 'sonar-scanner'
+
                         withCredentials([
                             string(
                                 credentialsId: 'sonarqube-token',
                                 variable: 'SONAR_TOKEN'
                             )
                         ]) {
-
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=ai-agent-devops \
-                              -Dsonar.sources=backend,frontend \
-                              -Dsonar.exclusions=**/node_modules/**
-                        """
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                  -Dsonar.projectKey=ai-agent-devops \
+                                  -Dsonar.sources=backend,frontend \
+                                  -Dsonar.exclusions=**/node_modules/** \
+                                  -Dsonar.token=\${SONAR_TOKEN}
+                            """
+                        }
                     }
                 }
             }
@@ -77,7 +68,6 @@ pipeline {
 
         stage('Trivy Filesystem Scan') {
             steps {
-
                 sh '''
                     trivy fs \
                       --severity HIGH,CRITICAL \
@@ -89,7 +79,6 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-
                 sh """
                     docker build \
                       -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
@@ -100,7 +89,6 @@ pipeline {
 
         stage('Build Frontend Image') {
             steps {
-
                 sh """
                     docker build \
                       -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
@@ -111,7 +99,6 @@ pipeline {
 
         stage('Trivy Backend Image Scan') {
             steps {
-
                 sh """
                     trivy image \
                       --severity HIGH,CRITICAL \
@@ -123,7 +110,6 @@ pipeline {
 
         stage('Trivy Frontend Image Scan') {
             steps {
-
                 sh """
                     trivy image \
                       --severity HIGH,CRITICAL \
@@ -135,7 +121,6 @@ pipeline {
 
         stage('Push Images to Docker Hub') {
             steps {
-
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub-creds',
@@ -194,18 +179,18 @@ pipeline {
 
         success {
             echo '''
-            ========================================
-            CI/CD PIPELINE SUCCESSFUL
-            ========================================
-            '''
+========================================
+CI/CD PIPELINE SUCCESSFUL
+========================================
+'''
         }
 
         failure {
             echo '''
-            ========================================
-            CI/CD PIPELINE FAILED
-            ========================================
-            '''
+========================================
+CI/CD PIPELINE FAILED
+========================================
+'''
         }
     }
 }
