@@ -1,0 +1,178 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-backend
+  namespace: ai-agent
+
+spec:
+
+  replicas: 2
+
+  strategy:
+
+    type: RollingUpdate
+
+    rollingUpdate:
+
+      maxUnavailable: 0
+
+      maxSurge: 1
+
+
+  selector:
+
+    matchLabels:
+
+      app: employee-backend
+
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: employee-backend
+
+
+    spec:
+
+      tolerations:
+
+        - key: "devops"
+
+          operator: "Equal"
+
+          value: "true"
+
+          effect: "NoSchedule"
+
+
+      containers:
+
+        - name: backend
+
+          image: srushti22/ai-agent-backend:1.0
+
+          imagePullPolicy: Always
+
+          ports:
+
+            - containerPort: 5000
+
+
+          env:
+
+            - name: DB_HOST
+              value: postgres
+
+            - name: DB_PORT
+              value: "5432"
+
+            - name: DB_NAME
+
+              valueFrom:
+
+                secretKeyRef:
+
+                  name: postgres-secret
+
+                  key: POSTGRES_DB
+
+
+            - name: DB_USER
+
+              valueFrom:
+
+                secretKeyRef:
+
+                  name: postgres-secret
+
+                  key: POSTGRES_USER
+
+
+            - name: DB_PASSWORD
+
+              valueFrom:
+
+                secretKeyRef:
+
+                  name: postgres-secret
+
+                  key: POSTGRES_PASSWORD
+
+
+          readinessProbe:
+
+            httpGet:
+
+              path: /api/health
+
+              port: 5000
+
+            initialDelaySeconds: 10
+
+            periodSeconds: 5
+
+            timeoutSeconds: 3
+
+            failureThreshold: 6
+
+
+          livenessProbe:
+
+            httpGet:
+
+              path: /api/health
+
+              port: 5000
+
+            initialDelaySeconds: 30
+
+            periodSeconds: 10
+
+            timeoutSeconds: 3
+
+            failureThreshold: 5
+
+
+          resources:
+
+            requests:
+
+              cpu: 100m
+
+              memory: 128Mi
+
+            limits:
+
+              cpu: 500m
+
+              memory: 512Mi
+
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+
+  name: employee-backend
+
+  namespace: ai-agent
+
+
+spec:
+
+  type: ClusterIP
+
+  selector:
+
+    app: employee-backend
+
+  ports:
+
+    - port: 5000
+
+      targetPort: 5000
