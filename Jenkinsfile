@@ -57,6 +57,12 @@ pipeline {
                     script {
 
                         def scannerHome = tool 'sonar-scanner'
+                        withCredentials([
+                            string(
+                                credentialsId: 'sonarqube-token',
+                                variable: 'SONAR_TOKEN'
+                            )
+                        ]) {
 
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
