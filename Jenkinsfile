@@ -4,7 +4,7 @@ pipeline {
 
     environment {
 
-        DOCKERHUB_USERNAME = 'YOUR_DOCKERHUB_USERNAME'
+        DOCKERHUB_USERNAME = 'srushti22'
 
         BACKEND_IMAGE = "${DOCKERHUB_USERNAME}/ai-agent-backend"
         FRONTEND_IMAGE = "${DOCKERHUB_USERNAME}/ai-agent-frontend"
@@ -29,7 +29,7 @@ pipeline {
                         sh '''
                             cd backend
 
-                            python3 -m pip install \
+                            python3 -m venv venv
 
                             ./venv/bin/pip install \
                               -r requirements.txt
