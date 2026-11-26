@@ -52,16 +52,19 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
 
-               withSonarQubeEnv('SonarQube') {
-                   script {
-                    def scannerHome = tool 'sonar-scanner'
+                withSonarQubeEnv('SonarQube') {
 
-                    sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=ai-agent-devops \
-                          -Dsonar.sources=backend,frontend \
-                          -Dsonar.exclusions=**/node_modules/**
-                    '''
+                    script {
+
+                        def scannerHome = tool 'sonar-scanner'
+
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=ai-agent-devops \
+                              -Dsonar.sources=backend,frontend \
+                              -Dsonar.exclusions=**/node_modules/**
+                        """
+                    }
                 }
             }
         }
