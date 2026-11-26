@@ -30,6 +30,8 @@ pipeline {
                             cd backend
 
                             python3 -m pip install \
+
+                            ./venv/bin/pip install \
                               -r requirements.txt
                         '''
                     }
